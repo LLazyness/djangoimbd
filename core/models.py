@@ -2,6 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models.aggregates import Sum
 from uuid import uuid4
+from sorl.thumbnail import ImageField
 
 
 def movie_directory_path_with_uuid(
@@ -9,11 +10,27 @@ def movie_directory_path_with_uuid(
     return '{}/{}'.format(instance.movie_id, uuid4())
 
 
-class MovieImage(models.Model):
-    image = models.ImageField(upload_to=movie_directory_path_with_uuid)
-    uploaded = models.DateTimeField(auto_now_add=True)
+class UserMovieList(models.Model):
     movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('movie', 'user')
+
+
+class MovieImage(models.Model):
+    image = models.ImageField(upload_to=movie_directory_path_with_uuid)
+    movie = models.ForeignKey('Movie', on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    def save(self, *args, **kwargs):
+        # delete old file when replacing by updating the file
+        try:
+            MovieImage.objects.get(movie=self.movie).delete()
+
+        except:
+            pass  # when new photo then we do nothing, normal case
+        super(MovieImage, self).save(*args, **kwargs)
 
 
 class MovieManager(models.Manager):
@@ -87,6 +104,9 @@ class Movie(models.Model):
     def __str__(self):
         return '{} ({})'.format(
             self.title, self.year)
+
+    class Meta:
+        unique_together = ('title', 'year')
 
 
 class VoteManager(models.Manager):

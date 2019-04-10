@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load thumbnail %}
+{% block title %}
+    All The Movies
+{% endblock %}
+
+{% block main %}
+
+    <div class="container">
+    {% for movie in object_list %}
+        {% if forloop.first %}
+            <div class="d-flex flex-row">
+        {% endif %}
+    <a href="{% url 'core:MovieDetail' pk=movie.movie.id %}">
+        <div class="col-3">
+        <div class="d-flex flex-row">
+            {% if movie.movie.movieimage_set.all  %}
+            {% endif %}
+            {% if movie.movie.movieimage_set.all %}
+                {% for image in movie.movie.movieimage_set.all %}
+                    {% thumbnail image.image "400x500" as im %}
+
+                        <img src="{{ im.url }}" class="rounded mx-auto d-block">
+
+
+                    {% endthumbnail %}
+                {% endfor %}
+            {% else %}
+
+                    {% thumbnail default_image.image "400x500" as default %}
+
+                        <img src="{{ default.url }}" class="rounded mx-auto d-block">
+
+
+                    {% endthumbnail %}
+
+            {% endif %}
+
+        </div>
+    </a>
+        <div class="flex-row text-center">
+
+            {{ movie.movie }}
+
+        </div>
+    </div>
+
+
+
+
+
+    {% if forloop.counter|divisibleby:4 %}
+        </div>
+        <div class="d-flex flex-row">
+    {% endif %}
+
+    {% if forloop.last %}
+        </div>
+    {% endif %}
+
+    {% endfor %}
+
+    {% comment %}{% for movie in object_list %}
+                {% if forloop.first %}
+                    <div class="d-flex flex-row">
+                {% endif %}
+
+                    <div class="col-3 text-center">
+                        {{ movie.movie }}
+                    </div>
+
+                {% if forloop.counter|divisibleby:4 %}
+                    </div>
+                    <div class="d-flex flex-row">
+                {% endif %}
+
+                {% if forloop.last %}
+                    </div>
+                {% endif %}
+    {% endfor %} {% endcomment %}
+
+
+{% endblock %}
+
+
